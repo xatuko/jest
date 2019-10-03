@@ -32,44 +32,7 @@ void saveMove()
     set.close();
 }
 
-LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
-{
-    BOOL fEatKeystroke = FALSE;
-    PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)lParam;
-    
-    switch(wParam)
-    {
-        case WM_KEYDOWN:
-            if(p->vkCode == 162)
-            {
-                cout << p->vkCode << 'd' << endl;
-                ss = 1;
-            }
-            break;
-        case WM_KEYUP:
-            if(p->vkCode == 162)
-            {
-                cout << p->vkCode << 'u' << endl;
-                ss = 0;
-            }
-            break;
-        case WM_SYSKEYDOWN:
-            if(p->vkCode == 162)
-            {
-                cout << p->vkCode << 'd' << endl;
-                ss = 1;
-            }
-            break;
-        case WM_SYSKEYUP:
-            if(p->vkCode == 162)
-            {
-                cout << p->vkCode << 'u' << endl;
-                ss = 0;
-            }
-            break;
-    }
-    return(fEatKeystroke ? 1 : CallNextHookEx(NULL, nCode, wParam, lParam));
-}
+
 
 void main()
 {
@@ -117,6 +80,30 @@ void main()
     }
 }*/
 
+
+LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
+{
+    BOOL fEatKeystroke = FALSE;
+    PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)lParam; // 162 - ctrl
+    
+    switch(wParam)
+    {
+        case WM_KEYDOWN:
+            if(p->vkCode == 162);
+            break;
+        case WM_KEYUP:
+            if(p->vkCode == 162);
+            break;
+        case WM_SYSKEYDOWN:
+            if(p->vkCode == 162);
+            break;
+        case WM_SYSKEYUP:
+            if(p->vkCode == 162);
+            break;
+    }
+    return(fEatKeystroke ? 1 : CallNextHookEx(NULL, nCode, wParam, lParam));
+}
+
 int convCom(string command)
 {
     if(command == "hide")
@@ -132,7 +119,8 @@ int convCom(string command)
 
 void main()
 {
-    thread thr;
+    HHOOK hhkLowLevelKybd = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, 0, 0);
+    thread catcher;
     string command;
     cout << " >> ";
     getline(std::cin, command);
@@ -158,8 +146,6 @@ void main()
         }
         cout << " >> ";
         getline(std::cin, command);
-        
-                
-        
     }
+    UnhookWindowsHookEx(hhkLowLevelKybd);
 }
