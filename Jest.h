@@ -7,8 +7,11 @@
 #include <thread>
 #include <fstream>
 #include <math.h>
+#include <string>
 
 using namespace std;
+
+int convCom(char* command);
 
 
 class Jest

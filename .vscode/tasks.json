@@ -5,7 +5,7 @@
         "label": "msvc build",
         "type": "shell",
         "command": "cl.exe",
-        "args": ["/EHsc", "/Zi", "/Fe:", "aw.exe", "main.cpp"],
+        "args": ["/EHsc", "/Zi", "/Fe:", "jest.exe", "main.cpp"],
         "group": {
           "kind": "build",
           "isDefault": true

@@ -1,5 +1,5 @@
 #include "Jest.h"
-ifstream get;
+/*ifstream get;
 ofstream set, newJest;
 int ss = 0;
 
@@ -115,5 +115,51 @@ void main()
         cout << "its time to choose: "<< endl;
         cin >> t;
     }
+}*/
+
+int convCom(string command)
+{
+    if(command == "hide")
+        return 1;
+    if(command == "add new move")
+        return 2;
+    if(command == "delete move")
+        return 3;
+    if(command == "disp moves")
+        return 4; 
+    return -1;
 }
 
+void main()
+{
+    thread thr;
+    string command;
+    cout << " >> ";
+    getline(std::cin, command);
+    while(command != "quit")
+    {
+        switch(convCom(command))
+        {
+            case 1:
+                ShowWindow(GetConsoleWindow(), SW_HIDE);
+                break;
+            case 2:
+                cout << "added" << endl;
+                break;
+            case 3:
+                cout << "deleted" << endl;
+                break;
+            case 4:
+                cout << "disped" << endl;
+                break;
+            default:
+                cout << "unknown command" << endl;
+                break;
+        }
+        cout << " >> ";
+        getline(std::cin, command);
+        
+                
+        
+    }
+}
