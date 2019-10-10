@@ -1,8 +1,9 @@
 #include "Jest.h"
-/*ifstream get;
-ofstream set, newJest;
-int ss = 0;
 
+ofstream temp;
+int keyStatus = 0;
+char  status[128];
+/*
 void saveMove()
 {
     
@@ -80,51 +81,115 @@ void main()
     }
 }*/
 
+void getMove()
+{
+    temp.open("temp.txt", ios::out);
+    int n = 0;
+    POINT pt, buf;
+    while(!strcmp(status, "procced"))
+    {
+        if(keyStatus)
+        {
+            if(n == 0)
+            {
+                GetCursorPos(&pt);
+                temp << pt.x << '\t' << pt.y << endl;
+                n++;
+                buf = pt;
+            }
+            else
+            {
+                GetCursorPos(&pt);
+                if(abs(pt.x - buf.x) > 20  || abs(pt.y - buf.y) > 20)
+                {
+                    temp << pt.x << '\t' << pt.y << endl;
+                    buf = pt;
+                }
+            }
+        }
+    }
+}
 
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
     BOOL fEatKeystroke = FALSE;
     PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)lParam; // 162 - ctrl
-    
-    switch(wParam)
+    if(nCode == HC_ACTION)
     {
-        case WM_KEYDOWN:
-            if(p->vkCode == 162);
-            break;
-        case WM_KEYUP:
-            if(p->vkCode == 162);
-            break;
-        case WM_SYSKEYDOWN:
-            if(p->vkCode == 162);
-            break;
-        case WM_SYSKEYUP:
-            if(p->vkCode == 162);
-            break;
+        switch(wParam)
+        {
+            case WM_KEYDOWN:
+                if(p->vkCode == 162)
+                    keyStatus = 1;
+                break;
+            case WM_KEYUP:
+                if(p->vkCode == 162)
+                {
+                    keyStatus = 0;
+                    int n;
+                    POINT* mas = numbOfPoints("temp.txt", n);
+                    for(int i = 0; i < n; i++)
+                        cout << mas[i].x << '\t' << mas[i].y << endl;
+                    temp.close();
+                    temp.open("temp.txt", ios::trunc);
+                    temp.close();
+                    temp.open("temp.txt", ios::out);
+                    POINT* conv = converted(mas,n);
+                    for(int i = 0; i < n; i++)
+                        cout << conv[i].x << '\t' << conv[i].y << endl;
+                }
+                break;
+            case WM_SYSKEYDOWN:
+                break;
+            case WM_SYSKEYUP:
+                break;
+        }
     }
     return(fEatKeystroke ? 1 : CallNextHookEx(NULL, nCode, wParam, lParam));
 }
 
-int convCom(string command)
+int convCom(char* command)
 {
-    if(command == "hide")
+    if(!strcmp(command, "hide"))
         return 1;
-    if(command == "add new move")
+    if(!strcmp(command, "add new move"))
         return 2;
-    if(command == "delete move")
+    if(!strcmp(command, "delete move"))
         return 3;
-    if(command == "disp moves")
+    if(!strcmp(command, "disp moves"))
         return 4; 
+    if(!strcmp(command, "start"))
+        return 5; 
     return -1;
 }
 
-void main()
+void startHook()
 {
     HHOOK hhkLowLevelKybd = SetWindowsHookEx(WH_KEYBOARD_LL, LowLevelKeyboardProc, 0, 0);
-    thread catcher;
-    string command;
+    if(!hhkLowLevelKybd)
+    {
+        cout << endl << "unable to hook keyboard" << endl;
+        return;
+    }
+    thread mouse(getMove);
+    MSG msg;
+    while (!GetMessage(&msg, NULL, NULL, NULL)) {    //this while loop keeps the hook
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    UnhookWindowsHookEx(hhkLowLevelKybd);
+    mouse.join();
+}
+
+
+
+void main()
+{
+    thread hooker;
+    char command[128];
     cout << " >> ";
-    getline(std::cin, command);
-    while(command != "quit")
+    cin.getline(command, 128);
+    while(strcmp(command, "quit") != 0)
     {
         switch(convCom(command))
         {
@@ -140,12 +205,16 @@ void main()
             case 4:
                 cout << "disped" << endl;
                 break;
+            case 5:
+                strcpy(status, "procced");
+                hooker = thread(startHook);
+                break;
             default:
                 cout << "unknown command" << endl;
                 break;
-        }
+        }  
         cout << " >> ";
-        getline(std::cin, command);
+        cin.getline(command, 128);
     }
-    UnhookWindowsHookEx(hhkLowLevelKybd);
+    SendMessage(GetConsoleWindow(), WM_CLOSE, NULL, NULL);
 }

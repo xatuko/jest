@@ -69,34 +69,6 @@ POINT* numbOfPoints(char* filename, int& n)
             else 
                 points[n].y = points[n-1].y;
             beg = buf;
-            /*if(abs(buf.x - beg.x) < 20)
-                ++lenX;
-            else if(lenX > 0)
-            {
-                ++n;
-                points[n].x = points[n-1].x;
-                if(beg.y - buf.y < 0)
-                    points[n].y = points[n-1].y-1;
-                else
-                    points[n].y = points[n-1].y+1;
-                beg = buf;
-                lenX = 0;
-                lenY = 0;
-            }
-            if(abs(buf.y - beg.y) < 20)
-                ++lenY;
-            else if(lenY > 0)
-            {
-                ++n;
-                if(beg.x - buf.x < 0)
-                    points[n].x = points[n-1].x-1;
-                else
-                    points[n].x = points[n-1].x+1;
-                points[n].y = points[n-1].y;
-                beg = buf;
-                lenY = 0;
-                lenX = 0;
-            }*/
         }
     }
     ++n;
@@ -104,7 +76,7 @@ POINT* numbOfPoints(char* filename, int& n)
     return points;
 }
 
-POINT* converted(POINT* mas, int n)
+POINT* converted(POINT* mas, int &n)
 {
     int lenX = 0, lenY = 0, nn = 1;
     POINT buf = mas[0];
@@ -184,8 +156,7 @@ POINT* converted(POINT* mas, int n)
         lenY = 0;
     }
     ++nn;
+    n = nn;
     cout << endl << endl;
-    for(int i = 0; i < nn; ++i)
-        cout << jest[i].x << '\t' << jest[i].y << endl;
     return jest;
 }
