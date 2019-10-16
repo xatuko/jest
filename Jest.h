@@ -8,155 +8,69 @@
 #include <fstream>
 #include <math.h>
 #include <string>
-
 using namespace std;
-
-int convCom(char* command);
-
 
 class Jest
 {
-    char* name;
-    POINT* mas;
-    public:
-        Jest(int n = 1)
-        {
-            mas = new POINT[n];
-            name = "";
-        }
-        void hlopok(char* filename)
-        {
+    char action[256];
+    POINT *mas;
+    int numbOfPoints;
 
-        }
-
+public:
+    Jest() {}
+    Jest(int n, POINT* mas)
+    {
+        numbOfPoints = n;
+        this->mas = mas;
+    }
+    void fillMas(POINT* points)
+    {
+        for(int i = 0; i < numbOfPoints; i++)
+            mas[i] = points[i];
+    }
+    friend bool operator ==(const Jest &j1, const Jest &j2)
+    {
+        if(j1.numbOfPoints != j2.numbOfPoints)
+            return false;
+        for(int i = 0; i < j1.numbOfPoints; i++)
+            if(j1.mas[i].x != j2.mas[i].x || j1.mas[i].y != j2.mas[i].y)
+                return false;
+        return true;
+    }
+    friend class ListOfJest;
 };
 
-POINT* numbOfPoints(char* filename, int& n)
-{ 
-    ifstream f;
-    f.open(filename, ios::in);
-    n = 0;
-    int wX, wY;
-    POINT* points = new POINT[512];
-    points[0].x = points[0].y = 0;
-    if(f.is_open())
-    {
-        POINT buf, beg;
-        int lenX = 0, lenY = 0;
-        f >> beg.x >> beg.y;
-        while(!f.eof())
-        {
-            f >> buf.x >> buf.y;
-            ++n;
-            wX = buf.x - beg.x;
-            if(abs(wX) > 19)
-            {
-                if(wX > 0)
-                    points[n].x = points[n-1].x+1;
-                else
-                    points[n].x = points[n-1].x-1;
-            }
-            else 
-                points[n].x = points[n-1].x;
-            wY = buf.y - beg.y;
-            if(abs(wY) > 19)
-            {
-                if(wY > 0)
-                    points[n].y = points[n-1].y+1;
-                else
-                    points[n].y = points[n-1].y-1;
-            }
-            else 
-                points[n].y = points[n-1].y;
-            beg = buf;
-        }
-    }
-    ++n;
-    f.close();
-    return points;
-}
-
-POINT* converted(POINT* mas, int &n)
+class ListOfJest
 {
-    int lenX = 0, lenY = 0, nn = 1;
-    POINT buf = mas[0];
-    for(int i = 1; i < n; ++i)
+    int numbOfMoves;
+    Jest* list;
+public:
+    ListOfJest()
     {
-        if(mas[i].x == buf.x)
-            ++lenX;
-        else if(lenX > 1)
+        ifstream moves;
+        moves.open("moves.txt", ios::in);
+        moves >> numbOfMoves;
+        list = new Jest[numbOfMoves];
+        int n;
+        for(int i = 0; i < numbOfMoves && !moves.eof(); i++)
         {
-            ++nn;
-            lenX = 0;
-            buf = mas[i];
-        }
-        if(mas[i].y == buf.y)
-            ++lenY;
-        else if(lenY > 1)
-        {
-            ++nn;
-            lenY = 0;
-            buf = mas[i];
+            moves >> list[i].numbOfPoints;
+            list[i].mas = new POINT[list[i].numbOfPoints];
+            for(int j = 0; j < list[i].numbOfPoints; j++)
+            {
+                moves >> list[i].mas[j].x;
+                moves >> list[i].mas[j].y;
+            }
+            char a;
+            moves >> a;
+            moves >> list[i].action; 
         }
     }
-    cout << endl <<  nn << endl;
-    ++nn;
-    POINT* jest = new POINT[nn];
-    jest[0].x = jest[0].y = 0;
-    nn = 0;
-    lenX = lenY = 0;
-    buf = mas[0];
-    for(int i = 1; i < n; ++i)
+    char* getAction(Jest j)
     {
-        if(mas[i].x == buf.x)
-            ++lenX;
-        else if(lenX > 1)
-        {
-            ++nn;
-            jest[nn].x = jest[nn-1].x;
-            if(mas[i].y - buf.y >= 0)
-                jest[nn].y = jest[nn-1].y+1;
-            else 
-                jest[nn].y = jest[nn-1].y-1;
-            lenX = 0;
-            buf = mas[i];
-        }
-        if(mas[i].y == buf.y)
-            ++lenY;
-        else if(lenY > 1)
-        {
-            ++nn;
-            jest[nn].y = jest[nn-1].y;
-            if(mas[i].x - buf.x >= 0)
-                jest[nn].x = jest[nn-1].x+1;
-            else 
-                jest[nn].x = jest[nn-1].x-1;
-            lenY = 0;
-            buf = mas[i];
-        }
+        for(int i = 0; i < numbOfMoves; i++)
+            if(list[i] == j)
+                return list[i].action;
+        return NULL;
     }
-    if(lenX > 1)
-        {
-        ++nn;
-        jest[nn].x = jest[nn-1].x;
-        if(mas[n-1].y - buf.y >= 0)
-            jest[nn].y = jest[nn-1].y+1;
-        else 
-            jest[nn].y = jest[nn-1].y-1;
-        lenX = 0;
-    }
-    if(lenY > 1)
-    {
-        ++nn;
-        jest[nn].y = jest[nn-1].y;
-        if(mas[n-1].x - buf.x >= 0)
-            jest[nn].x = jest[nn-1].x+1;
-        else 
-              jest[nn].x = jest[nn-1].x-1;
-        lenY = 0;
-    }
-    ++nn;
-    n = nn;
-    cout << endl << endl;
-    return jest;
-}
+};
