@@ -1,0 +1,5 @@
+4
+3 0 0 0 1 1 1 : showcalc
+3 0 0 0 1 -1 1 : showreg
+3 0 0 0 -1 1 -1 : showcmd
+3 0 0 0 -1 -1 -1 : show

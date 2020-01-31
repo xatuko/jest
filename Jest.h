@@ -1,4 +1,4 @@
-#pragma comment(lib, "user32")
+  #pragma comment(lib, "user32")
 
 #include <conio.h>
 #include <iostream>
@@ -28,6 +28,10 @@ public:
         for(int i = 0; i < numbOfPoints; i++)
             mas[i] = points[i];
     }
+    void setAction(char* action)
+    {
+        strcpy(this->action, action);
+    }
     friend bool operator ==(const Jest &j1, const Jest &j2)
     {
         if(j1.numbOfPoints != j2.numbOfPoints)
@@ -37,6 +41,15 @@ public:
                 return false;
         return true;
     }
+
+    Jest& operator=(const Jest& jest)
+    {
+        strcpy(this->action, jest.action);
+        this->mas = jest.mas;
+        this->numbOfPoints = jest.numbOfPoints;
+        return *this;
+    }
+
     friend class ListOfJest;
 };
 
@@ -65,12 +78,55 @@ public:
             moves >> a;
             moves >> list[i].action; 
         }
+        moves.close();
     }
+
+    void addMove(Jest j)
+    {
+        Jest* newlist = new Jest[++numbOfMoves];
+        int i = 0;
+        for(; i < numbOfMoves-1; i++)
+            newlist[i] = list[i];
+        newlist[i] = j;
+        list = newlist;
+        rewrite();
+    }
+
+    void rewrite()
+    {
+        ofstream newmoves;
+        newmoves.open("nmoves.txt", ios::out);
+        newmoves << numbOfMoves << endl;
+        for(int i = 0; i < numbOfMoves; i++)
+        {
+            int nop = list[i].numbOfPoints;
+            newmoves << nop << ' ';
+            for(int j = 0; j < nop; j++)
+                newmoves << list[i].mas[j].x << ' ' << list[i].mas[j].y << ' ';
+            newmoves << ": " << list[i].action << endl;
+        }
+        newmoves.close();
+        remove("moves.txt");
+        rename("nmoves.txt", "moves.txt");
+    }
+
     char* getAction(Jest j)
     {
         for(int i = 0; i < numbOfMoves; i++)
             if(list[i] == j)
                 return list[i].action;
         return NULL;
+    }
+
+    Jest& operator[](const int index)
+    {
+        return list[index];
+    }
+
+    ListOfJest& operator=(const ListOfJest& list)
+    {
+       this->numbOfMoves = list.numbOfMoves;
+       this->list = list.list;
+       return *this;
     }
 };

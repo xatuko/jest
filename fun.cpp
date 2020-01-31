@@ -11,6 +11,7 @@ void converted(int n = 0)
     int lenX = 0, lenY = 0;
     temp >> beg.x >> beg.y;
     move << buf.x << '\t' << buf.y << endl;
+    cout << buf.x << '\t' << buf.y << endl;
     while (!temp.eof())
     {
         temp >> pt.x >> pt.y;
@@ -86,19 +87,39 @@ void getEvent(char* action)
         system("start cmd.exe");
     if(!strcmp(action, "showcalc"))
         system("start calc.exe");
-    if(!strcmp(action, "showcalc"))
-        system("start regedit32.exe");
+    if(!strcmp(action, "showreg"))
+        system("start regedit.exe");
         
+}
+
+
+void unkJest(Jest j)
+{
+    ShowWindow(GetConsoleWindow(), SW_SHOW);
+    cout << endl << endl << "Unknown movement. Do you want do add new action for it? (y/n)";
+    char ans;
+    cin >> ans;
+    if(ans == 'y')
+    {
+        cout << endl << "Specify the location of the .exe file which should be run after this movement: ";
+        char path[256];
+        cin >> path;
+        j.setAction(path);
+        list.addMove(j);
+    }
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
 }
 
 void event()
 {
-    ifstream moves;
     int n;
     POINT* mas = getJest(n);
     Jest j(n, mas);
     char* action = list.getAction(j);
-    getEvent(action);
+    if(action != NULL)
+        getEvent(action);
+    else
+        unkJest(j);
 }
 
 void getMove()
@@ -108,7 +129,7 @@ void getMove()
     POINT pt, buf, beg;
     while(!strcmp(status, "procced"))
     {
-        if(keyStatus)
+        if( keyStatus == 1)
         {
             if(n == 0)
             {
@@ -145,6 +166,7 @@ void getMove()
                 }
             }
         }
+        Sleep(1);
     }
 }
 
@@ -152,24 +174,20 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
     BOOL fEatKeystroke = FALSE;
     PKBDLLHOOKSTRUCT p = (PKBDLLHOOKSTRUCT)lParam; // 162 - ctrl
-    if(nCode == HC_ACTION)
+    if(nCode == HC_ACTION && p->vkCode == 162)
     {
         switch(wParam)
         {
             case WM_KEYDOWN:
-                if(p->vkCode == 162)
-                    keyStatus = 1;
+                keyStatus = 1;
                 break;
             case WM_KEYUP:
-                if(p->vkCode == 162)
-                {
-                    keyStatus = 0;
-                    temp.close();
-                    converted();
-                    remove("temp.txt");
-                    temp.open("temp.txt", ios::out);
-                    event();
-                }
+                keyStatus = 0;
+                temp.close();
+                converted();
+                remove("temp.txt");
+                temp.open("temp.txt", ios::out);
+                event();
                 break;
             case WM_SYSKEYDOWN:
                 break;
@@ -188,14 +206,13 @@ void startHook()
         cout << endl << "unable to hook keyboard" << endl;
         return;
     }
-    thread mouse(getMove);
     MSG msg;
-    while (!GetMessage(&msg, NULL, NULL, NULL)) {    //this while loop keeps the hook
+    int igetok = 0;
+    while (igetok = GetMessage(&msg, NULL, NULL, NULL) != 0) {    //this while loop keeps the hook
         TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        DispatchMessage(&msg); 
     }
     UnhookWindowsHookEx(hhkLowLevelKybd);
-    mouse.join();
 }
 
 int convCom(char* command)
